@@ -1,3 +1,4 @@
+'''
 SELECT
     title,
     length,
@@ -339,3 +340,50 @@ case
     when rental_duration <= '4' then '짧음'
 from film
 limit 10;
+'''
+'''
+-- 하나의 영화도 존재하지 않는 카테고리 조회
+select name
+from category c 
+where not exists
+(
+	select *
+	from film_category fc 
+    where fc.category_id = c.category_id
+);
+
+-- 평균 길이가 긴 카테고리(HAVING)
+-- 카테고리별 평균 영화 길이를 구하시오.
+
+select c.name, avg(f.length) '평균상영시간'
+from film f inner join film_category fc
+	on f.film_id= fc.film_id
+    inner join category c
+    on fc.category_id = c.category_id
+group by c.name
+having avg(f.length) >120;
+
+-- 장르별 영화 수를 구하고 조회(GROUP BY + COUNT() +CASE)
+-- 50편 이상 -> 많음 / 30~49편 -> 보통 / 30편 미만 -> 적음
+
+select c.name, count(*), 
+	case
+		when count(*) >= 50 then "많음"
+		when count(*) >= 30 and count(*) <= 49 then "보통"
+		when count(*) <= 30 then "적음"
+	end as "구분"
+from film f inner join film_category fc
+	on f.film_id = fc.film_id
+    inner join category c
+    on fc.category_id = c.category_id
+group by c.name;
+
+-- 배우별 출연 영화 수
+
+select a.first_name,a.last_name, count(*)
+from actor a inner join film_actor fa
+	on a.actor_id = fa.actor_id
+group by a.first_name,a.last_name
+having count(*)>=30
+order by count(*) desc;
+'''
